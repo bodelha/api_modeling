@@ -1,0 +1,113 @@
+openapi: 3.0.3
+
+info:
+  title: Consulta de pedidos
+  version: 1.0.0
+
+paths:
+  /pedidos/{id}:
+    get:
+      summary: Dado o identificador do pedido, exibe suas características
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pedido"
+
+components:
+  schemas:
+    Cliente:
+      description: "Informações sobre o cliente"
+      properties:
+        codigo:
+          type: string
+          format: uuid
+          description: "Identificador único do cliente"
+          example: f6a72214-a502-4b38-a1ba-a14a605546b4
+        nome:
+          type: string
+          description: "Nome completo do cliente"
+          example: João da Silva
+        cpf:
+          type: string
+          description: "Número de CPF do cliente"
+          example: 28358436041
+
+    ItemPedido:
+      description: "Informações sobre o item de um pedido"
+      properties:
+        sequencia:
+          type: number
+          format: integer
+          description: "Número sequencial do item no pedido"
+          example: 1
+        produto:
+          $ref: '#/components/schemas/Produto'
+        quantidade:
+          type: number
+          format: integer
+          description: "Quantidade de itens"
+          example: 1
+        total:
+          type: number
+          format: decimal
+          description: "Valor total do item"
+          example: 300.50
+
+    Pedido:
+      description: "Informações sobre o pedido"
+      required:
+        - codigo
+        - cliente
+        - status
+        - filial_origem
+        - valor_total
+        - itens
+      type: object
+      properties:
+        codigo:
+          type: string
+          format: uuid
+          description: "Identificador único do pedido"
+          example: f6a72214-a502-4b38-a1ba-a14a605546b4
+        data:
+          type: string
+          format: date-time
+          description: "Data e hora do pedido"
+          example: 2024-05-04T22:01:53-0300
+        cliente:
+          $ref: "#/components/schemas/Cliente"
+        itens:
+          type: array
+          description: "Lista de itens do pedido"
+          items:
+            $ref: "#/components/schemas/ItemPedido"
+
+    Produto:
+      description: "Informações sobre o produto"
+      required:
+        - valor_unitario
+        - descricao
+      properties:
+        codigo:
+          type: string
+          description: "Código do produto"
+          example: 42xpto
+        descricao:
+          type: string
+          description: "Descrição do produto"
+          example: Tenis All Star preto cano alto 37
+        valor_unitario:
+          type: number
+          format: decimal
+          description: "Valor unitário do produto"
+          example: 300.50
