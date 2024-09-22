@@ -5,23 +5,100 @@ info:
   version: 1.0.0
 
 paths:
-  /pedidos/{id}:
+  /pedidos:
     get:
-      summary: Dado o identificador do pedido, exibe suas características
+      summary: Listagem dos pedidos
       parameters:
-        - name: id
-          in: path
-          required: true
+        - name: codigo
+          in: query
+          description: "Filtro pelo código identificador do pedido"
           schema:
             type: string
             format: uuid
+        - name: codigoCliente
+          in: query
+          description: "Filtro pelo código do cliente"
+          schema:
+            type: string
+            format: uuid
+        - name: cpfCliente
+          in: query
+          description: "Filtro pelo CPF do cliente"
+          schema:
+            type: string
+            example: "28358436041"
+        - name: status
+          in: query
+          description: "Filtro pelo status do pedido"
+          schema:
+            type: string
+            example: "em processamento"
+        - name: dataInicio
+          in: query
+          description: "Filtro para pedidos com data posterior ou igual a esta data"
+          schema:
+            type: string
+            format: date
+            example: "2024-01-01"
+        - name: dataFim
+          in: query
+          description: "Filtro para pedidos com data anterior ou igual a esta data"
+          schema:
+            type: string
+            format: date
+            example: "2024-12-31"
+        - name: limit
+          in: query
+          description: "Número máximo de pedidos a serem retornados"
+          schema:
+            type: integer
+            example: 10
+        - name: offset
+          in: query
+          description: "Número de resultados a pular na paginação"
+          schema:
+            type: integer
+            example: 0
       responses:
         "200":
-          description: successful operation
+          description: "Operação bem-sucedida"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalCount:
+                    type: integer
+                    description: "Número total de resultados"
+                    example: 100
+                  pedidos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pedido"
+        "400":
+          description: "Parâmetros inválidos"
+        "404":
+          description: "Nenhum pedido encontrado"
+    post:
+      summary: Cria um novo pedido
+      requestBody:
+        description: Dados para criar um novo pedido
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NovoPedido"
+      responses:
+        "201":
+          description: Pedido criado com sucesso
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pedido"
+        "400":
+          description: "Parâmetros inválidos"
+        "500":
+          description: "Erro no servidor ao processar o pedido"
 
 components:
   schemas:
@@ -51,7 +128,7 @@ components:
           description: "Número sequencial do item no pedido"
           example: 1
         produto:
-          $ref: '#/components/schemas/Produto'
+          $ref: "#/components/schemas/Produto"
         quantidade:
           type: number
           format: integer
@@ -62,6 +139,29 @@ components:
           format: decimal
           description: "Valor total do item"
           example: 300.50
+
+    NovoPedido:
+      description: "Informações sobre o pedido a serem inseridas no momento da criação"
+      required:
+        - cliente
+        - status
+        - filial_origem
+        - valor_total
+        - itens
+      type: object
+      properties:
+        cliente:
+          $ref: "#/components/schemas/Cliente"
+        data:
+          type: string
+          format: date-time
+          description: "Data e hora do pedido"
+          example: 2024-05-04T22:01:53-0300
+        itens:
+          type: array
+          description: "Lista de itens do pedido"
+          items:
+            $ref: "#/components/schemas/ItemPedido"
 
     Pedido:
       description: "Informações sobre o pedido"
